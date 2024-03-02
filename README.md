@@ -1,8 +1,3 @@
 # HostelHub
-done 
-hello world
-hello
-hi there
-hello ayushmaan
-hello goyal is here
+usefull web platform for efficient and automated hostel room reservation.
 
