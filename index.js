@@ -11,7 +11,9 @@ app.use(express.urlencoded({extended:false}));
 
 const dataMap = new Map();
 const room_available = new Map();
-const room_single= new Map();
+const room_single = new Map();
+const admin_map = new Map();
+
 
 fs.readFile('password.txt', 'utf8', (err, data) => {
     if (err) {
@@ -35,6 +37,8 @@ app.use(express.urlencoded({extended:false}));
 
 connect('mongodb://127.0.0.1:27017/project_hostel_all');
 
+
+// student routes 
 function check_if_room_avaiable(room){
     if(room_available.get(room)==1){
         return false;
@@ -142,8 +146,39 @@ app.post('/book_single',async(req,res)=>{
 })
 
 
-app.listen(port , ()=> console.log("server started at port " + port));
+// ADMIN ROUUTES
+app.get('/admin/signin', (req, res) => {
+    if (admin_map.get(req.body.id)==req.body.pass) {
+        res.send("login done");
+    }
+    else{
+        res.send({message:"failed"});
+    }
+    res.end();
 
+});
+
+//check carefully 
+app.post('/admin/clear_database', async(req, res) => {
+    const result = await student_information.deleteMany({});
+    res.end();
+});
+
+// look at all the ticket/complaint 
+app.post('/ticket',async(req,res)=>{
+    const result = await student_information.find({});
+    console.log(result);
+    res.end();
+})
+
+app.post('/ticket/resolve',async(req,res)=>{
+    const result = await student_information.deleteOne({room_number:req.body.room_num});
+    console.log(result);
+    res.end();
+})
+
+
+app.listen(port , ()=> console.log("server started at port " + port));
 
 
 
