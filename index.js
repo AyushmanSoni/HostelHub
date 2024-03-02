@@ -10,6 +10,9 @@ const {connect} = require('./connection')
 app.use(express.urlencoded({extended:false}));
 
 const dataMap = new Map();
+const room_available = new Map();
+const room_single= new Map();
+
 fs.readFile('password.txt', 'utf8', (err, data) => {
     if (err) {
       console.error('Error reading file:', err);
@@ -31,6 +34,21 @@ fs.readFile('password.txt', 'utf8', (err, data) => {
 app.use(express.urlencoded({extended:false}));
 
 connect('mongodb://127.0.0.1:27017/project_hostel_all');
+
+function check_if_room_avaiable(room){
+    if(room_available.get(room)==1){
+        return false;
+    }
+    return true;
+}
+
+function check_if_room_single(room){
+    if(room_single.get(room)==1){
+        return true;
+    }
+    return false;
+}
+
 
 app.use((req,res,next)=>{
     if(req.params){
@@ -78,6 +96,51 @@ app.post('/compliant', async(req,res)=>{
 
     res.end();
 })
+
+
+app.post('/book_single',async(req,res)=>{
+    //name roll email-id phone number dob room_num
+
+    // console.log(req.body)
+    if(!req){
+        res.send({"enter valid information":"1"});
+        res.end();
+    }
+
+    const student = await student_information.findOne({ student_roll: req.body.roll });
+    if(student){
+        // console.log(student)
+        console.log("already booked");
+    }
+    else{
+
+        if(check_if_room_avaiable(req.body.room)){}
+        else{
+            res.send("room already booked");
+            res.end();
+        }
+
+        if(check_if_room_single(req.body.room)){}
+        else{
+            res.send("room already booked");
+            res.end();
+        }
+        
+        // console.log(req)
+        data={
+            student_roll:req.body.roll,
+            student_name: req.body.name,
+            room_alloted: req.body.room_status,
+            room_number: req.body.room,
+            hostel:req.body.hostel,
+        }
+        const result = await student_information.create(data);
+        room_available.set( req.body.room, 1);
+        console.log("result");
+    }
+    res.send("success");
+})
+
 
 app.listen(port , ()=> console.log("server started at port " + port));
 
